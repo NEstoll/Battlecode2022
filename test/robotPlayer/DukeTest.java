@@ -1,9 +1,9 @@
-package examplefuncsplayer;
+package robotPlayer;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class RobotPlayerTest {
+public class DukeTest {
 
 	@Test
 	public void testSanity() {

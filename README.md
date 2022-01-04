@@ -1,6 +1,6 @@
 # Battlecode 2022 Scaffold
 
-This is the Battlecode 2022 scaffold, containing an `examplefuncsplayer`. Read https://play.battlecode.org/getting-started!
+This is the Battlecode 2022 scaffold, containing an `robotPlayer`. Read https://play.battlecode.org/getting-started!
 
 ### Project Structure
 
