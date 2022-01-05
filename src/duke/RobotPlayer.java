@@ -40,6 +40,8 @@ public strictfp class RobotPlayer {
             Direction.NORTHWEST,
     };
 
+    static int archonCount;
+
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * It is like the main function for your robot. If this method returns, the robot dies!
@@ -49,6 +51,9 @@ public strictfp class RobotPlayer {
      **/
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
+        //variables
+        archonCount = rc.getArchonCount();
+
 
         Robot me = null;
 

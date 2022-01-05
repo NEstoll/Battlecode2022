@@ -4,7 +4,7 @@ import battlecode.common.*;
 import static duke.RobotPlayer.*;
 
 public class Soldier extends Droid{
-    MapLocation target = null;
+    MapLocation goal = null;
 
     public Soldier(RobotController rc) {
         super(rc);
@@ -12,64 +12,85 @@ public class Soldier extends Droid{
 
     @Override
     public void act() throws GameActionException {
-        if (target != null && rc.canSenseLocation(target)) {
-            if (rc.senseRobotAtLocation(target) == null) {
-                rc.writeSharedArray(rc.getArchonCount()+1, 0);
-                target = null;
-            }
+        if (rc.getRoundNum() > 585) {
+            boolean stop = true;
         }
-
-        // Try to attack someone
-        int radius = rc.getType().actionRadiusSquared;
-        Team opponent = rc.getTeam().opponent();
-        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
+        rc.setIndicatorString(goal!=null?goal.toString():"null");
+        //sensing/high level
+        if (goal != null && rc.canSenseLocation(goal) && (rc.senseRobotAtLocation(goal) == null || rc.senseRobotAtLocation(goal).getType() != RobotType.ARCHON)) {
+            goal = null;
+            moveQueue.clear();
+        }
+        RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().actionRadiusSquared, rc.getTeam().opponent());
+        RobotInfo t = null;
         for (RobotInfo r: enemies) {
-            //look for HQ's
             if (r.getType() == RobotType.ARCHON) {
-                int loc =r.getLocation().x << 6;
-                loc += r.getLocation().y;
-                rc.writeSharedArray(rc.getArchonCount()+1, loc);
-            }
-        }
-        if (target != null && rc.canAttack(target)) {
-            rc.attack(target);
-        }
-        if (enemies.length > 0) {
-            MapLocation toAttack = enemies[0].location;
-            if (rc.canAttack(toAttack)) {
-                rc.attack(toAttack);
-            }
-        }
-
-        //pathfinding
-        if (moveQueue.isEmpty() || target == null) {
-            //need new location to move to
-            target = null;
-            //check if target known
-            int n =rc.readSharedArray(rc.getArchonCount()+1);
-            if (n != 0) {
-                target = new MapLocation(((n >> 6) & 63), n & 63);
-            }
-            if (target == null) {
-                //no target found, search for one
-                int index = rng.nextInt(rc.getArchonCount());
-                int num = rc.readSharedArray(index);
-                int rand = rng.nextInt(3);
-                if (rand == 0) {
-                    //check rotational symmetry
-                    target = new MapLocation(rc.getMapWidth() - ((num >> 6) & 63), rc.getMapHeight() - num & 63);
-                } else if (rand == 1) {
-                    //horizontal
-                    target = new MapLocation(rc.getMapWidth() - ((num >> 6) & 63), num & 63);
-                } else {
-                    //vertical
-                    target =new MapLocation(((num >> 6) & 63), rc.getMapHeight() - num & 63);
+                for (int i = archonCount; i< archonCount*2; i++) {
+                    int num = rc.readSharedArray(i);
+                    if (num == 0 || decodeArchon(num).getID() == r.getID()) {
+                        rc.writeSharedArray(i, encodeArchon(r));
+                        System.out.println("[" + i + "]: " + encodeArchon(r));
+                        break;
+                    }
+                }
+                if (rc.canAttack(r.location)) {
+                    rc.attack(r.location);
                 }
             }
-            pathfind(target);
+            if (r.getType() == RobotType.SAGE) {
+                if (t==null || t.getType() != RobotType.SAGE) {
+                    t = r;
+                }
+            }
+            if (r.getType() == RobotType.SOLDIER) {
+                if (t==null || (t.getType() != RobotType.SAGE && t.getType() != RobotType.SOLDIER)) {
+                    t = r;
+                }
+            }
         }
-        if (moveQueue.peek() != null && rc.canMove(moveQueue.peek())) {
-            rc.move(moveQueue.poll());
+        if (t != null && rc.canAttack(t.getLocation())) {
+            rc.attack(t.getLocation());
+        }
+
+        move();
+    }
+
+    public void move() throws GameActionException {
+        if (goal == null) {
+            for (int i = archonCount; i < archonCount*2; i++) {
+                if (rc.readSharedArray(i) != 0) {
+                    RobotInfo robot = decodeArchon(rc.readSharedArray(i));
+                    goal = robot.getLocation();
+                    moveQueue.clear();
+                    if (rc.canSenseLocation(goal) && (rc.senseRobotAtLocation(goal) == null || rc.senseRobotAtLocation(goal).getID() != robot.getID())) {
+                        System.out.println("Archon missing (possible destroyed");
+                        rc.writeSharedArray(i, 0);
+                        goal = null;
+                    }
+                    break;
+                }
+            }
+        } else {
+            rc.setIndicatorLine(rc.getLocation(), goal, 0, 0, 200);
+        }
+        if (moveQueue.isEmpty()) {
+            if (goal != null) {
+                pathfind(goal);
+            } else {
+                MapLocation a = decodeLocation(rc.readSharedArray(rng.nextInt(archonCount)));
+                //choose random symmetry to try
+                pathfind(new MapLocation(rng.nextBoolean()?rc.getMapWidth()- a.x:a.x, rng.nextBoolean()?rc.getMapHeight()-a.y:a.y));
+            }
+        }
+        if (moveQueue.peek() != null) {
+            if (rc.canMove(moveQueue.peek())) {
+                rc.move(moveQueue.poll());
+            } else if (rc.canMove(moveQueue.peek().rotateLeft())) {
+                rc.move(moveQueue.poll().rotateLeft());
+            } else if (rc.canMove(moveQueue.peek().rotateRight())) {
+                rc.move(moveQueue.poll().rotateRight());
+            }
         }
     }
+
 }
