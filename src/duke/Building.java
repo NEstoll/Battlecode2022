@@ -1,6 +1,6 @@
-package robotPlayer;
+package duke;
 
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public abstract class Building extends Robot {
     public Building(RobotController rc) {

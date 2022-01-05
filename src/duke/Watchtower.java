@@ -1,11 +1,9 @@
-package robotPlayer;
+package duke;
 
 import battlecode.common.*;
 
-public class Sage extends Droid{
-
-
-    public Sage(RobotController rc) {
+public class Watchtower extends Building{
+    public Watchtower(RobotController rc) {
         super(rc);
     }
 

@@ -1,9 +1,9 @@
-package robotPlayer;
+package duke;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class DukeTest {
+public class RobotPlayerTest {
 
 	@Test
 	public void testSanity() {

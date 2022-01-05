@@ -1,7 +1,7 @@
-package robotPlayer;
+package duke;
 
 import battlecode.common.*;
-import static robotPlayer.Duke.*;
+import static duke.RobotPlayer.*;
 
 public class Miner extends Droid {
     public Miner(RobotController rc) {
@@ -19,9 +19,10 @@ public class Miner extends Droid {
                 while (rc.canMineGold(mineLocation)) {
                     rc.mineGold(mineLocation);
                 }
-                while (rc.canMineLead(mineLocation)) {
+                while (rc.canMineLead(mineLocation) && rc.senseLead(mineLocation) > 1) {
                     rc.mineLead(mineLocation);
                 }
+                int i = GameConstants.ADD_LEAD_EVERY_ROUNDS;
             }
         }
 
@@ -29,7 +30,6 @@ public class Miner extends Droid {
         Direction dir = directions[rng.nextInt(directions.length)];
         if (rc.canMove(dir)) {
             rc.move(dir);
-            System.out.println("I moved!");
         }
     }
 }

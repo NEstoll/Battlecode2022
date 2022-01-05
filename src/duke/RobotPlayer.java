@@ -1,4 +1,4 @@
-package robotPlayer;
+package duke;
 
 import battlecode.common.*;
 
@@ -9,7 +9,7 @@ import java.util.Random;
  * The run() method inside this class is like your main function: this is what we'll call once your robot
  * is created!
  */
-public strictfp class Duke {
+public strictfp class RobotPlayer {
 
     /**
      * We will use this variable to count the number of turns this robot has been alive.
@@ -75,13 +75,14 @@ public strictfp class Duke {
                 me = new Sage(rc);
                 break;
         }
-
-        try {
-            me.run();
-        } catch (Exception e) {
-            //uncaught exception
-            e.printStackTrace();
-            System.out.println("EXCEPTION, BAD!!");
+        while (true) {
+            try {
+                me.run();
+            } catch (Exception e) {
+                //uncaught exception
+                e.printStackTrace();
+                rc.resign();
+            }
         }
         // Your code should never reach here (unless it's intentional)! Self-destruction imminent...
     }

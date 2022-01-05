@@ -1,9 +1,9 @@
-package robotPlayer;
+package duke;
 
 import battlecode.common.*;
 
-public class Watchtower extends Building{
-    public Watchtower(RobotController rc) {
+public class Builder extends Droid {
+    public Builder(RobotController rc) {
         super(rc);
     }
 

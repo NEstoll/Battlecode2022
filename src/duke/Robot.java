@@ -1,4 +1,4 @@
-package robotPlayer;
+package duke;
 
 import battlecode.common.*;
 
